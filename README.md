@@ -162,7 +162,7 @@ ns-train splatfacto \
 
 The `--data` path should point to the local `frog_nerfstudio` directory, and `--max-num-iterations` can be chosen according to the desired training budget and quality. After training, the Nerfstudio viewer or export tools can be used to inspect and utilize the learned Gaussian Splat model.
 
-As a concrete example, assuming this repository is located at `/home/<user>/Downloads/view_scene_mini/AbstractRenderingDataCollection`, one possible training command used in development was:
+As a concrete example, assuming this repository is located at `/home/<user>/Abstract-Rendering-Data-Collector`, one possible training command used in development was:
 
 ```bash
 ns-train splatfacto \
