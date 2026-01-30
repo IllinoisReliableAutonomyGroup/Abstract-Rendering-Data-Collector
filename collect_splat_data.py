@@ -41,13 +41,7 @@ def camera_extrinsics_from_vtk(camera, z_is_forward=True):
     f = F - C
     f /= np.linalg.norm(f)  # normalize
 
-    # If you want +Z = forward, keep it as-is
-    # If you want +Z = backward (like typical OpenGL), invert it:
-    if not z_is_forward:
-        f = -f
-
-    # 2) Right vector
-    # If you want +Z = backward (like typical OpenGL), invert it:
+    # If +Z is meant to be backward (like typical OpenGL), invert f.
     if not z_is_forward:
         f = -f
 
@@ -59,13 +53,21 @@ def camera_extrinsics_from_vtk(camera, z_is_forward=True):
     u = np.cross(r, f)
     u /= np.linalg.norm(u)
 
-    # Construct rotation matrix R so that:
-    # R[0,:] = r, R[1,:] = u, R[2,:] = f
-    # That means each row is one of the basis vectors.
+    # Construct rotation matrix R so that each row is a basis vector
+    # in camera coordinates expressed in world coordinates:
+    #   R[0,:] = r (camera +X)
+    #   R[1,:] = u (camera +Y)
+    #   R[2,:] = f (camera +Z)
     R = np.array([r, u, f])  # shape (3,3)
 
+    # Ensure a right-handed coordinate system (positive determinant).
+    det = np.linalg.det(R)
+    if det < 0:
+        # Flip one axis (right) to fix handedness.
+        R[0, :] = -R[0, :]
+
     # 4) Compute translation so that X_cam = R * (X_world - C).
-    # Typically, extrinsic is [R | -R*C], but we can store t = - R*C:
+    # Typically, extrinsic is [R | -R*C], but we can store t = -R*C:
     t = -R @ C
 
     return R, t
