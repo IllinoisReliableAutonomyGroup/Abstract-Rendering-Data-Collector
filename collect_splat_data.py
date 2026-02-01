@@ -119,7 +119,9 @@ if __name__ == "__main__":
     parser.add_argument('--num-subtargets', type=int, default=1,
                         help='Number of sub-targets along +Z/-Z to look at from each camera position (default: 1 = only main target)')
     parser.add_argument('--z-length', type=float, default=0.0,
-                        help='Approximate object length along +Z; used to place sub-targets from -z_length/2 to +z_length/2 (default: 0.0)')
+                        help='Approximate object length along the sub-target axis; used to place sub-targets from -z_length/2 to +z_length/2 (default: 0.0)')
+    parser.add_argument('--subtarget-axis', type=str, choices=['x', 'y', 'z'], default='z',
+                        help='Axis along which to place sub-targets (default: z)')
     args = parser.parse_args()
     
     gltf_file = args.gltf_file
@@ -217,19 +219,36 @@ if __name__ == "__main__":
                 # Use average radius as reference for normalization
                 reference_radius = (args.radius_x + args.radius_y + args.radius_z) / 3.0
 
-            # Determine sub-targets along the +Z/-Z direction through center_target
+            # Determine sub-targets along the chosen axis through center_target
             num_sub = max(1, args.num_subtargets)
-            z_len = max(0.0, args.z_length)
-            if num_sub == 1 or z_len == 0.0:
+            axis_len = max(0.0, args.z_length)
+            if num_sub == 1 or axis_len == 0.0:
                 sub_targets = [center_target]
             else:
-                z_start = args.target_z - z_len / 2.0
-                z_end = args.target_z + z_len / 2.0
-                z_samples = np.linspace(z_start, z_end, num_sub)
-                sub_targets = [
-                    np.array([args.target_x, args.target_y, z_val], dtype=float)
-                    for z_val in z_samples
-                ]
+                if args.subtarget_axis == 'z':
+                    start = args.target_z - axis_len / 2.0
+                    end = args.target_z + axis_len / 2.0
+                    samples = np.linspace(start, end, num_sub)
+                    sub_targets = [
+                        np.array([args.target_x, args.target_y, val], dtype=float)
+                        for val in samples
+                    ]
+                elif args.subtarget_axis == 'x':
+                    start = args.target_x - axis_len / 2.0
+                    end = args.target_x + axis_len / 2.0
+                    samples = np.linspace(start, end, num_sub)
+                    sub_targets = [
+                        np.array([val, args.target_y, args.target_z], dtype=float)
+                        for val in samples
+                    ]
+                else:  # 'y'
+                    start = args.target_y - axis_len / 2.0
+                    end = args.target_y + axis_len / 2.0
+                    samples = np.linspace(start, end, num_sub)
+                    sub_targets = [
+                        np.array([args.target_x, val, args.target_z], dtype=float)
+                        for val in samples
+                    ]
             
             # For each camera position, look at all sub-targets along +Z/-Z
             for sub_target in sub_targets:
