@@ -58,7 +58,7 @@ These are later converted into Nerfstudio’s `transforms.json` format.
 
 - The camera orbits the object on a set of pitch/yaw angles.
 - You can choose a circular or elliptical trajectory.
-- For each camera position, the camera can look at one or several sub‑targets along the world Z‑axis (useful for long objects like trucks).
+- For each camera position, the camera can look at one or several sub‑targets along a chosen world axis (useful for long objects like trucks or airplanes).
 - Camera and target positions are normalized by a scale factor so that all scenes live at a consistent scale.
 
 **Arguments**
@@ -70,7 +70,8 @@ python collect_splat_data.py frog.glb \
 	--radius [radius] \
 	--target-x [target_x] --target-y [target_y] --target-z [target_z] \
 	--num-subtargets [num_subtargets] \
-	--z-length [z_length]
+	--z-length [z_length] \
+	--subtarget-axis [x|y|z]
 ```
 
 Key options:
@@ -86,8 +87,9 @@ Key options:
 - Look‑at target:
 	- `--target-x`, `--target-y`, `--target-z`: Main look‑at point (typically the object’s visual center). All orbits are centered around this point.
 - Long‑object coverage:
-	- `--num-subtargets`: Number of sub‑targets along the Z‑axis per camera position.
-	- `--z-length`: Approximate object length along +Z; sub‑targets are spaced between `target_z ± z_length/2`.
+	- `--num-subtargets`: Number of sub‑targets along the chosen axis per camera position.
+	- `--z-length`: Approximate object length along that axis; sub‑targets are spaced around the main target over a range of length `z_length`.
+	- `--subtarget-axis {x,y,z}`: Axis along which sub‑targets are placed (`z` by default). For example, for a long truck aligned with world Z use the default, while for an airplane aligned with world X use `--subtarget-axis x`.
 
 **Output structure**
 
